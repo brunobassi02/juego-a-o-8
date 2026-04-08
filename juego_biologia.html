@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioChallenge: El Reino Animal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #1565c0;
+            --accent: #fbc02d;
+            --light: #f1f8e9;
+            --dark: #263238;
+            --correct: #4caf50;
+            --wrong: #f44336;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #game-container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-topic {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-topic:hover {
+            background-color: #0d47a1;
+            transform: translateY(-2px);
+        }
+
+        .option-btn {
+            background-color: #eee;
+            width: 100%;
+            margin-bottom: 0.8rem;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background-color: #ddd;
+        }
+
+        .correct { background-color: var(--correct) !important; color: white; }
+        .wrong { background-color: var(--wrong) !important; color: white; }
+
+        #feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .hidden { display: none; }
+
+        .score-board {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        progress {
+            width: 100%;
+            height: 20px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🌿 BioChallenge: Reino Animal</h1>
+</header>
+
+<div id="game-container">
+    <!-- Pantalla de Inicio -->
+    <div id="start-screen">
+        <h2>Selecciona un tema para jugar:</h2>
+        <div class="menu-grid">
+            <button class="btn-topic" onclick="startGame('Nomenclatura')">Nomenclatura Binomial</button>
+            <button class="btn-topic" onclick="startGame('Claves Dicot.')">Claves Dicotómicas</button>
+            <button class="btn-topic" onclick="startGame('Los 5 Reinos')">Los 5 Reinos</button>
+            <button class="btn-topic" onclick="startGame('Artrópodos')">Artrópodos</button>
+            <button class="btn-topic" onclick="startGame('Vertebrados')">Vertebrados</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Juego -->
+    <div id="quiz-screen" class="hidden">
+        <div class="score-board">Puntos: <span id="score">0</span> | Tema: <span id="current-topic-name"></span></div>
+        <progress id="progress-bar" value="0" max="10"></progress>
+        <h3 id="question-text">Pregunta aquí</h3>
+        <div id="options-container"></div>
+        <div id="feedback"></div>
+        <button id="next-btn" class="hidden" onclick="nextQuestion()" style="background: var(--accent); margin-top: 10px;">Siguiente Pregunta</button>
+    </div>
+
+    <!-- Pantalla Final -->
+    <div id="end-screen" class="hidden">
+        <h2>¡Juego Terminado!</h2>
+        <p id="final-result"></p>
+        <button class="btn-topic" onclick="location.reload()">Volver a Jugar</button>
+    </div>
+</div>
+
+<script>
+    // Datos simplificados para la web app (25 preguntas para no saturar el código, 5 por tema)
+    const questions = [
+        { topic: 'Nomenclatura', q: '¿Cuál es el formato correcto para escribir el nombre científico?', o: ['Panthera Leo', 'panthera leo', 'Panthera leo (en cursiva)', 'panthera Leo'], a: 2, f: 'Género en mayúscula, especie en minúscula y en cursiva.' },
+        { topic: 'Nomenclatura', q: '¿Por qué se usa el latín?', o: ['Es fácil', 'Es lengua muerta y universal', 'Por religión', 'Suena mejor'], a: 1, f: 'Al ser lengua muerta, no cambia y es igual en todo el mundo.' },
+        { topic: 'Nomenclatura', q: 'En Canis lupus, "Canis" es el...', o: ['Especie', 'Género', 'Familia', 'Reino'], a: 1, f: 'La primera palabra siempre es el Género.' },
+        { topic: 'Nomenclatura', q: 'Padre de la taxonomía moderna:', o: ['Darwin', 'Mendel', 'Linneo', 'Pasteur'], a: 2, f: 'Linneo creó el sistema binomial.' },
+        { topic: 'Nomenclatura', q: 'El nombre científico evita:', o: ['Confusión de nombres comunes', 'La extinción', 'Peleas', 'Mutaciones'], a: 0, f: 'Unifica criterios globales.' },
+
+        { topic: 'Claves Dicot.', q: '¿Qué es una clave dicotómica?', o: ['Mapa', 'Herramienta de 2 opciones por paso', 'Examen', 'Dibujo'], a: 1, f: 'Divide las opciones en dos caminos lógicos.' },
+        { topic: 'Claves Dicot.', q: 'Dicotómica significa división en...', o: ['3 partes', '1 parte', '2 partes', '4 partes'], a: 2, f: 'Siempre hay dos opciones opuestas (a o b).' },
+        { topic: 'Claves Dicot.', q: 'Si el animal tiene patas, vas al paso:', o: ['Siguiente', 'Anterior', 'Según indique la clave', 'Ninguno'], a: 2, f: 'La clave te guía con números de paso.' },
+        { topic: 'Claves Dicot.', q: 'Las características deben ser:', o: ['Opiniones', 'Observables y claras', 'Color favorito', 'Edad'], a: 1, f: 'Deben basarse en rasgos físicos reales.' },
+        { topic: 'Claves Dicot.', q: 'Si fallas el primer paso...', o: ['Aciertas igual', 'Identificación falsa', 'Cambia el animal', 'No pasa nada'], a: 1, f: 'Un error inicial arruina todo el proceso.' },
+
+        { topic: 'Los 5 Reinos', q: '¿Reino de las bacterias?', o: ['Fungi', 'Monera', 'Plantae', 'Protoctista'], a: 1, f: 'Monera agrupa procariotas.' },
+        { topic: 'Los 5 Reinos', q: 'Fungi se diferencia de Plantae en:', o: ['Son heterótrofos', 'Se mueven', 'Tienen flores', 'Son procariotas'], a: 0, f: 'Los hongos no hacen fotosíntesis.' },
+        { topic: 'Los 5 Reinos', q: '¿Qué define al Reino Animalia?', o: ['Unicelulares', 'Multicelulares y heterótrofos', 'Hacen fotosíntesis', 'Tienen pared celular'], a: 1, f: 'Muchos tejidos y comen otros seres.' },
+        { topic: 'Los 5 Reinos', q: 'Las levaduras son del reino:', o: ['Monera', 'Animal', 'Fungi', 'Plantae'], a: 2, f: 'Son hongos unicelulares.' },
+        { topic: 'Los 5 Reinos', q: '¿Por qué un virus no está en los 5 reinos?', o: ['Muy pequeños', 'No son células vivas completas', 'No tienen ADN', 'Son malos'], a: 1, f: 'Requieren de otros para vivir.' },
+
+        { topic: 'Artrópodos', q: '¿Qué significa artrópodo?', o: ['Mucha sangre', 'Patas articuladas', 'Sin huesos', 'Con alas'], a: 1, f: 'Su nombre viene de piezas articuladas.' },
+        { topic: 'Artrópodos', q: '¿Cuántas patas tiene un insecto?', o: ['4', '6', '8', '10'], a: 1, f: 'Tres pares de patas es la regla.' },
+        { topic: 'Artrópodos', q: 'Las arañas son:', o: ['Insectos', 'Crustáceos', 'Arácnidos', 'Miriápodos'], a: 2, f: 'Tienen 8 patas, son arácnidos.' },
+        { topic: 'Artrópodos', q: 'El esqueleto externo se llama:', o: ['Endoesqueleto', 'Exoesqueleto', 'Cáscara', 'Piel'], a: 1, f: 'Protección rígida externa.' },
+        { topic: 'Artrópodos', q: 'Un ciempiés es un:', o: ['Arácnido', 'Miriápodo', 'Insecto', 'Crustáceo'], a: 1, f: 'Miriápodo significa "muchos pies".' },
+
+        { topic: 'Vertebrados', q: '¿Rasgo principal de vertebrados?', o: ['Pulmones', 'Columna vertebral', 'Pelo', 'Sangre roja'], a: 1, f: 'Poseen un eje óseo interno.' },
+        { topic: 'Vertebrados', q: 'Los delfines son:', o: ['Peces', 'Anfibios', 'Mamíferos', 'Reptiles'], a: 2, f: 'Tienen pulmones y dan leche.' },
+        { topic: 'Vertebrados', q: 'Rasgo exclusivo de aves:', o: ['Vuelan', 'Ponen huevos', 'Tienen plumas', 'Tienen pico'], a: 2, f: 'Solo las aves poseen plumas.' },
+        { topic: 'Vertebrados', q: 'Los anfibios adultos respiran por:', o: ['Solo branquias', 'Pulmones y piel', 'Boca', 'No respiran'], a: 1, f: 'Tienen respiración cutánea y pulmonar.' },
+        { topic: 'Vertebrados', q: 'Ectotermo significa:', o: ['Sangre caliente', 'Temperatura depende del ambiente', 'Sin sangre', 'Vive en el agua'], a: 1, f: 'Regulan su calor con el sol o sombra.' }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function startGame(topic) {
+        currentQuestions = questions.filter(q => q.topic === topic);
+        currentIndex = 0;
+        score = 0;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('current-topic-name').innerText = topic;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const qData = currentQuestions[currentIndex];
+        document.getElementById('question-text').innerText = qData.q;
+        document.getElementById('progress-bar').value = currentIndex;
+        document.getElementById('score').innerText = score;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').classList.add('hidden');
+
+        qData.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.classList.add('option-btn');
+            btn.onclick = () => checkAnswer(index);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(choice) {
+        const qData = currentQuestions[currentIndex];
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedback = document.getElementById('feedback');
+
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (choice === qData.a) {
+            buttons[choice].classList.add('correct');
+            score += 10;
+            feedback.innerText = "¡Correcto! " + qData.f;
+            feedback.style.backgroundColor = "#c8e6c9";
+        } else {
+            buttons[choice].classList.add('wrong');
+            buttons[qData.a].classList.add('correct');
+            feedback.innerText = "Incorrecto. " + qData.f;
+            feedback.style.backgroundColor = "#ffcdd2";
+        }
+
+        feedback.style.display = 'block';
+        document.getElementById('next-btn').classList.remove('hidden');
+        document.getElementById('score').innerText = score;
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < currentQuestions.length) {
+            showQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-result').innerText = `Lograste ${score} puntos de ${currentQuestions.length * 10} posibles.`;
+    }
+</script>
+
+</body>
+</html>
