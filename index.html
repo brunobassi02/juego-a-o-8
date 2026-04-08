@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioChallenge Pro: Reino Animal</title>
+    <title>BioChallenge Elite: Reino Animal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2e7d32;
-            --secondary: #1565c0;
-            --accent: #fbc02d;
-            --light: #f1f8e9;
-            --dark: #263238;
-            --correct: #4caf50;
-            --wrong: #f44336;
+            --primary: #1b5e20;
+            --secondary: #0d47a1;
+            --accent: #ffab00;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --white: #ffffff;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: #e8f5e9;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -27,288 +25,306 @@
             min-height: 100vh;
         }
 
+        /* Widget de Usuario */
+        #user-profile {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: var(--white);
+            padding: 5px 15px;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        #user-profile img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid var(--primary);
+        }
+
         header {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             width: 100%;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        #game-container {
+        #game-box {
             max-width: 600px;
             width: 90%;
-            background: white;
+            background: var(--white);
             margin: 2rem 0;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
-        /* Pantallas */
-        .screen { display: none; flex-direction: column; }
+        .screen { display: none; flex-direction: column; gap: 1rem; }
         .active { display: flex; }
 
-        /* Inputs y Botones */
-        input[type="text"] {
-            padding: 12px;
-            font-size: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            outline: none;
-        }
-
         button {
-            padding: 12px;
+            padding: 15px 25px;
             font-size: 1rem;
             font-weight: 600;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-        .btn-main { background-color: var(--secondary); color: white; }
-        .btn-main:hover { background-color: #0d47a1; transform: translateY(-2px); }
-        
-        .option-btn { background-color: #f5f5f5; text-align: left; }
-        .option-btn:hover { background-color: #e0e0e0; }
-        
-        .correct { background-color: var(--correct) !important; color: white; }
-        .wrong { background-color: var(--wrong) !important; color: white; }
+        .btn-google { background: #4285F4; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google:hover { background: #357ae8; transform: scale(1.02); }
 
-        /* Ranking Table */
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        .leaderboard-table th, .leaderboard-table td {
+        .btn-topic { background: var(--secondary); color: white; }
+        .btn-topic:hover { background: #1565c0; transform: translateY(-3px); }
+
+        .option-btn { background: #f0f0f0; text-align: left; margin-bottom: 10px; }
+        .option-btn:hover { background: #e0e0e0; }
+        .correct { background: #4caf50 !important; color: white; }
+        .wrong { background: #f44336 !important; color: white; }
+
+        /* Leaderboard Moderno */
+        .rank-card {
+            display: flex;
+            align-items: center;
             padding: 10px;
-            text-align: left;
             border-bottom: 1px solid #eee;
         }
-        .leaderboard-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .rank-number { font-weight: bold; color: var(--primary); width: 30px; }
+        .rank-card img { width: 40px; height: 40px; border-radius: 50%; margin: 0 15px; }
+        .rank-card .name { flex-grow: 1; text-align: left; font-weight: 600; }
+        .rank-card .pts { font-weight: bold; color: var(--secondary); }
 
-        .hidden { display: none; }
-        .feedback { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: 600; }
+        .feedback { padding: 15px; border-radius: 10px; font-size: 0.9rem; margin-top: 10px; }
+        progress { width: 100%; height: 12px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
+<div id="user-profile">
+    <img id="user-photo" src="" alt="avatar">
+    <span id="user-name" style="font-size: 0.8rem; font-weight: 600;"></span>
+</div>
+
 <header>
-    <h1>🌿 BioChallenge Explorer</h1>
+    <h1>🧪 BioChallenge: Reino Animal</h1>
 </header>
 
-<div id="game-container">
+<div id="game-box">
     
-    <!-- PANTALLA 1: REGISTRO -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="screen active">
-        <h2>¡Bienvenido, Biólogo!</h2>
-        <p>Ingresa tu nombre o apodo para comenzar:</p>
-        <input type="text" id="player-name" placeholder="Ej: Darwin_2024" maxlength="15">
-        <button class="btn-main" onclick="goToMenu()">Continuar</button>
+        <h2>Identificación de Estudiante</h2>
+        <p>Para guardar tu progreso y entrar al ranking, inicia sesión con tu cuenta escolar:</p>
+        <button class="btn-google" onclick="login()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20">
+            Entrar con Google
+        </button>
     </div>
 
-    <!-- PANTALLA 2: SELECCIÓN DE TEMA -->
+    <!-- MENU SCREEN -->
     <div id="menu-screen" class="screen">
-        <h2>Hola <span id="display-name"></span>, elige un tema:</h2>
-        <button class="btn-main" onclick="startQuiz('Nomenclatura')">Nomenclatura Binomial</button>
-        <button class="btn-main" onclick="startQuiz('Claves Dicot.')">Claves Dicotómicas</button>
-        <button class="btn-main" onclick="startQuiz('Los 5 Reinos')">Los 5 Reinos</button>
-        <button class="btn-main" onclick="startQuiz('Artrópodos')">Artrópodos</button>
-        <button class="btn-main" onclick="startQuiz('Vertebrados')">Vertebrados</button>
+        <h2>Panel de Control</h2>
+        <p>Selecciona la unidad que deseas completar:</p>
+        <button class="btn-topic" onclick="startQuiz('Nomenclatura')">Nomenclatura Binomial</button>
+        <button class="btn-topic" onclick="startQuiz('Los 5 Reinos')">Los 5 Reinos</button>
+        <button class="btn-topic" onclick="startQuiz('Artrópodos')">Artrópodos</button>
+        <button class="btn-topic" onclick="startQuiz('Vertebrados')">Vertebrados</button>
     </div>
 
-    <!-- PANTALLA 3: JUEGO (QUIZ) -->
+    <!-- QUIZ SCREEN -->
     <div id="quiz-screen" class="screen">
-        <div style="display:flex; justify-content: space-between; font-weight: bold;">
-            <span>Puntos: <span id="score">0</span></span>
-            <span id="current-topic-name"></span>
-        </div>
-        <hr>
-        <h3 id="question-text">Pregunta</h3>
-        <div id="options-container" style="display: flex; flex-direction: column;"></div>
-        <div id="feedback" class="feedback hidden"></div>
-        <button id="next-btn" class="btn-main hidden" onclick="handleNext()">Siguiente Pregunta</button>
+        <progress id="quiz-progress" value="0" max="5"></progress>
+        <h3 id="question-text">Cargando pregunta...</h3>
+        <div id="options-container"></div>
+        <div id="feedback" class="feedback" style="display:none"></div>
+        <button id="next-btn" class="btn-topic" style="display:none" onclick="nextQuestion()">Siguiente</button>
     </div>
 
-    <!-- PANTALLA 4: RESULTADO Y RANKING -->
+    <!-- END SCREEN -->
     <div id="end-screen" class="screen">
-        <h2>¡Gran trabajo!</h2>
-        <p>Tu puntaje final es: <strong id="final-score">0</strong> puntos.</p>
+        <h2 id="final-msg">¡Excelente!</h2>
+        <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">
+            <span id="final-score">0</span> pts
+        </div>
+        <p id="high-score-msg" style="color: #d81b60; font-weight: bold;"></p>
         
+        <hr>
         <h3>🏆 Top 10 de la Clase</h3>
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Estudiante</th>
-                    <th>Puntos</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-                <!-- Los datos de Firebase se cargarán aquí -->
-            </tbody>
-        </table>
+        <div id="leaderboard-list"></div>
         <br>
-        <button class="btn-main" onclick="location.reload()">Jugar de Nuevo</button>
+        <button class="btn-topic" onclick="location.reload()">Jugar otra vez</button>
     </div>
 
 </div>
 
 <script type="module">
-    // --- CONFIGURACIÓN DE FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // ⚠️ REEMPLAZA ESTE OBJETO CON TUS CREDENCIALES DE FIREBASE ⚠️
-   const firebaseConfig = {
-  apiKey: "AIzaSyDyo4-VMaKFXy7fFAdscwqkdCCxAV8L5wU",
-  authDomain: "biochallenge-b094e.firebaseapp.com",
-  projectId: "biochallenge-b094e",
-  storageBucket: "biochallenge-b094e.firebasestorage.app",
-  messagingSenderId: "725761705810",
-  appId: "1:725761705810:web:c0206f9c80274abb62dc8b"
-};
+    // --- COPIA AQUÍ TU CONFIGURACIÓN DE FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_DOMINIO.firebaseapp.com",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_SENDER_ID",
+        appId: "TU_APP_ID"
+    };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    // --- BASE DE DATOS DE PREGUNTAS (Resumen para ejemplo) ---
-    const questions = [
-        { topic: 'Nomenclatura', q: '¿Cuál es el formato correcto para escribir el nombre científico?', o: ['Panthera Leo', 'panthera leo', 'Panthera leo (en cursiva)', 'panthera Leo'], a: 2, f: 'Género en mayúscula, especie en minúscula y en cursiva.' },
-        { topic: 'Nomenclatura', q: '¿Por qué se usa el latín?', o: ['Es fácil', 'Es lengua muerta y universal', 'Por religión', 'Suena mejor'], a: 1, f: 'Al ser lengua muerta, no cambia y es igual en todo el mundo.' },
-        { topic: 'Claves Dicot.', q: 'Dicotómica significa división en...', o: ['3 partes', '1 parte', '2 partes', '4 partes'], a: 2, f: 'Siempre hay dos opciones opuestas (a o b).' },
-        { topic: 'Los 5 Reinos', q: '¿Reino de las bacterias?', o: ['Fungi', 'Monera', 'Plantae', 'Protoctista'], a: 1, f: 'Monera agrupa procariotas.' },
-        { topic: 'Artrópodos', q: '¿Cuántas patas tiene un insecto?', o: ['4', '6', '8', '10'], a: 1, f: 'Tres pares de patas es la regla.' },
-        { topic: 'Vertebrados', q: 'Los delfines son:', o: ['Peces', 'Anfibios', 'Mamíferos', 'Reptiles'], a: 2, f: 'Tienen pulmones y dan leche.' }
-        // Se pueden añadir las 50 aquí siguiendo el mismo formato.
-    ];
+    let currentUser = null;
+    let score = 0;
+    let currentQuestions = [];
+    let qIndex = 0;
+
+    // --- AUTENTICACIÓN ---
+    window.login = async () => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            currentUser = result.user;
+            updateUI(currentUser);
+            switchScreen('menu-screen');
+        } catch (error) {
+            console.error("Error Login:", error);
+            alert("Error al iniciar sesión.");
+        }
+    };
+
+    function updateUI(user) {
+        if (user) {
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-photo').src = user.photoURL;
+            document.getElementById('user-name').innerText = user.displayName;
+        }
+    }
 
     // --- LÓGICA DEL JUEGO ---
-    let playerName = "";
-    let currentScore = 0;
-    let selectedQuestions = [];
-    let currentIndex = 0;
+    const questionsDB = [
+        { topic: 'Nomenclatura', q: '¿Cómo se escribe el nombre científico del gato?', o: ['Felis Catus', 'felis catus', 'Felis catus', 'FELIS CATUS'], a: 2, f: 'Género Mayúscula, especie minúscula.' },
+        { topic: 'Nomenclatura', q: '¿Qué idioma se usa en taxonomía?', o: ['Inglés', 'Latín', 'Griego', 'Español'], a: 1, f: 'Se usa Latín por ser lengua muerta y universal.' },
+        { topic: 'Los 5 Reinos', q: '¿A qué reino pertenecen las setas?', o: ['Plantae', 'Monera', 'Fungi', 'Animalia'], a: 2, f: 'Los hongos pertenecen al reino Fungi.' },
+        { topic: 'Artrópodos', q: '¿Cuántas patas tiene un escorpión (arácnido)?', o: ['6', '8', '10', '12'], a: 1, f: 'Los arácnidos tienen 8 patas.' },
+        { topic: 'Vertebrados', q: '¿Qué animal es un mamífero acuático?', o: ['Tiburón', 'Delfín', 'Tortuga', 'Pulpo'], a: 1, f: 'El delfín tiene pulmones y amamanta a sus crías.' }
+    ];
 
-    window.goToMenu = function() {
-        playerName = document.getElementById('player-name').value.trim();
-        if (playerName.length < 3) {
-            alert("Por favor, ingresa un nombre válido.");
-            return;
-        }
-        document.getElementById('display-name').innerText = playerName;
-        switchScreen('menu-screen');
-    }
-
-    window.startQuiz = function(topic) {
-        selectedQuestions = questions.filter(q => q.topic === topic);
-        if(selectedQuestions.length === 0) selectedQuestions = [questions[0]]; // Fallback
-        currentIndex = 0;
-        currentScore = 0;
-        document.getElementById('current-topic-name').innerText = topic;
+    window.startQuiz = (topic) => {
+        currentQuestions = questionsDB.filter(q => q.topic === topic);
+        qIndex = 0;
+        score = 0;
         switchScreen('quiz-screen');
         showQuestion();
-    }
+    };
 
     function showQuestion() {
-        const qData = selectedQuestions[currentIndex];
-        document.getElementById('question-text').innerText = qData.q;
-        document.getElementById('score').innerText = currentScore;
-        
+        const q = currentQuestions[qIndex];
+        document.getElementById('quiz-progress').value = qIndex;
+        document.getElementById('question-text').innerText = q.q;
         const container = document.getElementById('options-container');
         container.innerHTML = '';
-        document.getElementById('feedback').classList.add('hidden');
-        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
 
-        qData.o.forEach((opt, index) => {
-            const btn = document.createElement('button');
-            btn.innerText = opt;
-            btn.classList.add('option-btn');
-            btn.onclick = () => checkAnswer(index);
-            container.appendChild(btn);
+        q.o.forEach((opt, i) => {
+            const b = document.createElement('button');
+            b.innerText = opt;
+            b.classList.add('option-btn');
+            b.style.width = '100%';
+            b.onclick = () => checkAnswer(i);
+            container.appendChild(b);
         });
     }
 
-    function checkAnswer(choice) {
-        const qData = selectedQuestions[currentIndex];
+    function checkAnswer(i) {
+        const q = currentQuestions[qIndex];
         const buttons = document.querySelectorAll('.option-btn');
-        const feedback = document.getElementById('feedback');
-
         buttons.forEach(btn => btn.disabled = true);
+        
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'block';
 
-        if (choice === qData.a) {
-            buttons[choice].classList.add('correct');
-            currentScore += 100;
-            feedback.innerText = "✅ ¡Correcto! " + qData.f;
-            feedback.style.backgroundColor = "#c8e6c9";
+        if (i === q.a) {
+            buttons[i].classList.add('correct');
+            score += 100;
+            feedback.innerText = "¡Bien hecho! " + q.f;
+            feedback.style.background = "#c8e6c9";
         } else {
-            buttons[choice].classList.add('wrong');
-            buttons[qData.a].classList.add('correct');
-            feedback.innerText = "❌ Incorrecto. " + qData.f;
-            feedback.style.backgroundColor = "#ffcdd2";
+            buttons[i].classList.add('wrong');
+            buttons[q.a].classList.add('correct');
+            feedback.innerText = "No... " + q.f;
+            feedback.style.background = "#ffcdd2";
         }
-
-        feedback.classList.remove('hidden');
-        document.getElementById('next-btn').classList.remove('hidden');
-        document.getElementById('score').innerText = currentScore;
+        document.getElementById('next-btn').style.display = 'block';
     }
 
-    window.handleNext = function() {
-        currentIndex++;
-        if (currentIndex < selectedQuestions.length) {
+    window.nextQuestion = () => {
+        qIndex++;
+        if (qIndex < currentQuestions.length) {
             showQuestion();
         } else {
-            finishGame();
+            saveAndShowResults();
         }
-    }
+    };
 
-    async function finishGame() {
-        document.getElementById('final-score').innerText = currentScore;
+    async function saveAndShowResults() {
         switchScreen('end-screen');
+        document.getElementById('final-score').innerText = score;
         
-        try {
-            // 1. Guardar en Firebase
-            await addDoc(collection(db, "leaderboard"), {
-                name: playerName,
-                score: currentScore,
-                date: serverTimestamp()
-            });
-            
-            // 2. Cargar Ranking
-            loadLeaderboard();
-        } catch (e) {
-            console.error("Error al guardar puntos: ", e);
+        const userRef = doc(db, "rankings", currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        let isNewHigh = false;
+        if (!userDoc.exists() || score > userDoc.data().highScore) {
+            await setDoc(userRef, {
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                highScore: score,
+                timestamp: new Date()
+            }, { merge: true });
+            isNewHigh = true;
         }
+
+        document.getElementById('high-score-msg').innerText = isNewHigh ? "¡NUEVO RÉCORD PERSONAL!" : "Sigue intentando superar tu récord.";
+        loadLeaderboard();
     }
 
     async function loadLeaderboard() {
-        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
-        const querySnapshot = await getDocs(q);
-        const tbody = document.getElementById('leaderboard-body');
-        tbody.innerHTML = '';
+        const q = query(collection(db, "rankings"), orderBy("highScore", "desc"), limit(10));
+        const snap = await getDocs(q);
+        const list = document.getElementById('leaderboard-list');
+        list.innerHTML = '';
         
-        let rank = 1;
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const row = `<tr>
-                <td class="rank-number">${rank++}</td>
-                <td>${data.name}</td>
-                <td>${data.score}</td>
-            </tr>`;
-            tbody.innerHTML += row;
+        snap.forEach((doc) => {
+            const d = doc.data();
+            list.innerHTML += `
+                <div class="rank-card">
+                    <img src="${d.photo}" referrerpolicy="no-referrer">
+                    <div class="name">${d.name}</div>
+                    <div class="pts">${d.highScore} pts</div>
+                </div>
+            `;
         });
     }
 
     function switchScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+    }
+</script>
+
+</body>
+</html>
     }
 </script>
 
