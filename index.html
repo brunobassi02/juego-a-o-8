@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioChallenge: El Reino Animal</title>
+    <title>BioChallenge Pro: Reino Animal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,172 +37,194 @@
         }
 
         #game-container {
-            max-width: 800px;
+            max-width: 600px;
             width: 90%;
             background: white;
-            margin-top: 2rem;
+            margin: 2rem 0;
             padding: 2rem;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        /* Pantallas */
+        .screen { display: none; flex-direction: column; }
+        .active { display: flex; }
+
+        /* Inputs y Botones */
+        input[type="text"] {
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            outline: none;
         }
 
         button {
-            padding: 1rem;
+            padding: 12px;
             font-size: 1rem;
             font-weight: 600;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            margin-bottom: 0.5rem;
         }
 
-        .btn-topic {
-            background-color: var(--secondary);
-            color: white;
-        }
-
-        .btn-topic:hover {
-            background-color: #0d47a1;
-            transform: translateY(-2px);
-        }
-
-        .option-btn {
-            background-color: #eee;
-            width: 100%;
-            margin-bottom: 0.8rem;
-            text-align: left;
-        }
-
-        .option-btn:hover {
-            background-color: #ddd;
-        }
-
+        .btn-main { background-color: var(--secondary); color: white; }
+        .btn-main:hover { background-color: #0d47a1; transform: translateY(-2px); }
+        
+        .option-btn { background-color: #f5f5f5; text-align: left; }
+        .option-btn:hover { background-color: #e0e0e0; }
+        
         .correct { background-color: var(--correct) !important; color: white; }
         .wrong { background-color: var(--wrong) !important; color: white; }
 
-        #feedback {
+        /* Ranking Table */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            display: none;
         }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .leaderboard-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .rank-number { font-weight: bold; color: var(--primary); width: 30px; }
 
         .hidden { display: none; }
-
-        .score-board {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        progress {
-            width: 100%;
-            height: 20px;
-            margin-bottom: 1rem;
-        }
+        .feedback { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🌿 BioChallenge: Reino Animal</h1>
+    <h1>🌿 BioChallenge Explorer</h1>
 </header>
 
 <div id="game-container">
-    <!-- Pantalla de Inicio -->
-    <div id="start-screen">
-        <h2>Selecciona un tema para jugar:</h2>
-        <div class="menu-grid">
-            <button class="btn-topic" onclick="startGame('Nomenclatura')">Nomenclatura Binomial</button>
-            <button class="btn-topic" onclick="startGame('Claves Dicot.')">Claves Dicotómicas</button>
-            <button class="btn-topic" onclick="startGame('Los 5 Reinos')">Los 5 Reinos</button>
-            <button class="btn-topic" onclick="startGame('Artrópodos')">Artrópodos</button>
-            <button class="btn-topic" onclick="startGame('Vertebrados')">Vertebrados</button>
+    
+    <!-- PANTALLA 1: REGISTRO -->
+    <div id="login-screen" class="screen active">
+        <h2>¡Bienvenido, Biólogo!</h2>
+        <p>Ingresa tu nombre o apodo para comenzar:</p>
+        <input type="text" id="player-name" placeholder="Ej: Darwin_2024" maxlength="15">
+        <button class="btn-main" onclick="goToMenu()">Continuar</button>
+    </div>
+
+    <!-- PANTALLA 2: SELECCIÓN DE TEMA -->
+    <div id="menu-screen" class="screen">
+        <h2>Hola <span id="display-name"></span>, elige un tema:</h2>
+        <button class="btn-main" onclick="startQuiz('Nomenclatura')">Nomenclatura Binomial</button>
+        <button class="btn-main" onclick="startQuiz('Claves Dicot.')">Claves Dicotómicas</button>
+        <button class="btn-main" onclick="startQuiz('Los 5 Reinos')">Los 5 Reinos</button>
+        <button class="btn-main" onclick="startQuiz('Artrópodos')">Artrópodos</button>
+        <button class="btn-main" onclick="startQuiz('Vertebrados')">Vertebrados</button>
+    </div>
+
+    <!-- PANTALLA 3: JUEGO (QUIZ) -->
+    <div id="quiz-screen" class="screen">
+        <div style="display:flex; justify-content: space-between; font-weight: bold;">
+            <span>Puntos: <span id="score">0</span></span>
+            <span id="current-topic-name"></span>
         </div>
+        <hr>
+        <h3 id="question-text">Pregunta</h3>
+        <div id="options-container" style="display: flex; flex-direction: column;"></div>
+        <div id="feedback" class="feedback hidden"></div>
+        <button id="next-btn" class="btn-main hidden" onclick="handleNext()">Siguiente Pregunta</button>
     </div>
 
-    <!-- Pantalla de Juego -->
-    <div id="quiz-screen" class="hidden">
-        <div class="score-board">Puntos: <span id="score">0</span> | Tema: <span id="current-topic-name"></span></div>
-        <progress id="progress-bar" value="0" max="10"></progress>
-        <h3 id="question-text">Pregunta aquí</h3>
-        <div id="options-container"></div>
-        <div id="feedback"></div>
-        <button id="next-btn" class="hidden" onclick="nextQuestion()" style="background: var(--accent); margin-top: 10px;">Siguiente Pregunta</button>
+    <!-- PANTALLA 4: RESULTADO Y RANKING -->
+    <div id="end-screen" class="screen">
+        <h2>¡Gran trabajo!</h2>
+        <p>Tu puntaje final es: <strong id="final-score">0</strong> puntos.</p>
+        
+        <h3>🏆 Top 10 de la Clase</h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Estudiante</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <!-- Los datos de Firebase se cargarán aquí -->
+            </tbody>
+        </table>
+        <br>
+        <button class="btn-main" onclick="location.reload()">Jugar de Nuevo</button>
     </div>
 
-    <!-- Pantalla Final -->
-    <div id="end-screen" class="hidden">
-        <h2>¡Juego Terminado!</h2>
-        <p id="final-result"></p>
-        <button class="btn-topic" onclick="location.reload()">Volver a Jugar</button>
-    </div>
 </div>
 
-<script>
-    // Datos simplificados para la web app (25 preguntas para no saturar el código, 5 por tema)
+<script type="module">
+    // --- CONFIGURACIÓN DE FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ⚠️ REEMPLAZA ESTE OBJETO CON TUS CREDENCIALES DE FIREBASE ⚠️
+   const firebaseConfig = {
+  apiKey: "AIzaSyDyo4-VMaKFXy7fFAdscwqkdCCxAV8L5wU",
+  authDomain: "biochallenge-b094e.firebaseapp.com",
+  projectId: "biochallenge-b094e",
+  storageBucket: "biochallenge-b094e.firebasestorage.app",
+  messagingSenderId: "725761705810",
+  appId: "1:725761705810:web:c0206f9c80274abb62dc8b"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- BASE DE DATOS DE PREGUNTAS (Resumen para ejemplo) ---
     const questions = [
         { topic: 'Nomenclatura', q: '¿Cuál es el formato correcto para escribir el nombre científico?', o: ['Panthera Leo', 'panthera leo', 'Panthera leo (en cursiva)', 'panthera Leo'], a: 2, f: 'Género en mayúscula, especie en minúscula y en cursiva.' },
         { topic: 'Nomenclatura', q: '¿Por qué se usa el latín?', o: ['Es fácil', 'Es lengua muerta y universal', 'Por religión', 'Suena mejor'], a: 1, f: 'Al ser lengua muerta, no cambia y es igual en todo el mundo.' },
-        { topic: 'Nomenclatura', q: 'En Canis lupus, "Canis" es el...', o: ['Especie', 'Género', 'Familia', 'Reino'], a: 1, f: 'La primera palabra siempre es el Género.' },
-        { topic: 'Nomenclatura', q: 'Padre de la taxonomía moderna:', o: ['Darwin', 'Mendel', 'Linneo', 'Pasteur'], a: 2, f: 'Linneo creó el sistema binomial.' },
-        { topic: 'Nomenclatura', q: 'El nombre científico evita:', o: ['Confusión de nombres comunes', 'La extinción', 'Peleas', 'Mutaciones'], a: 0, f: 'Unifica criterios globales.' },
-
-        { topic: 'Claves Dicot.', q: '¿Qué es una clave dicotómica?', o: ['Mapa', 'Herramienta de 2 opciones por paso', 'Examen', 'Dibujo'], a: 1, f: 'Divide las opciones en dos caminos lógicos.' },
         { topic: 'Claves Dicot.', q: 'Dicotómica significa división en...', o: ['3 partes', '1 parte', '2 partes', '4 partes'], a: 2, f: 'Siempre hay dos opciones opuestas (a o b).' },
-        { topic: 'Claves Dicot.', q: 'Si el animal tiene patas, vas al paso:', o: ['Siguiente', 'Anterior', 'Según indique la clave', 'Ninguno'], a: 2, f: 'La clave te guía con números de paso.' },
-        { topic: 'Claves Dicot.', q: 'Las características deben ser:', o: ['Opiniones', 'Observables y claras', 'Color favorito', 'Edad'], a: 1, f: 'Deben basarse en rasgos físicos reales.' },
-        { topic: 'Claves Dicot.', q: 'Si fallas el primer paso...', o: ['Aciertas igual', 'Identificación falsa', 'Cambia el animal', 'No pasa nada'], a: 1, f: 'Un error inicial arruina todo el proceso.' },
-
         { topic: 'Los 5 Reinos', q: '¿Reino de las bacterias?', o: ['Fungi', 'Monera', 'Plantae', 'Protoctista'], a: 1, f: 'Monera agrupa procariotas.' },
-        { topic: 'Los 5 Reinos', q: 'Fungi se diferencia de Plantae en:', o: ['Son heterótrofos', 'Se mueven', 'Tienen flores', 'Son procariotas'], a: 0, f: 'Los hongos no hacen fotosíntesis.' },
-        { topic: 'Los 5 Reinos', q: '¿Qué define al Reino Animalia?', o: ['Unicelulares', 'Multicelulares y heterótrofos', 'Hacen fotosíntesis', 'Tienen pared celular'], a: 1, f: 'Muchos tejidos y comen otros seres.' },
-        { topic: 'Los 5 Reinos', q: 'Las levaduras son del reino:', o: ['Monera', 'Animal', 'Fungi', 'Plantae'], a: 2, f: 'Son hongos unicelulares.' },
-        { topic: 'Los 5 Reinos', q: '¿Por qué un virus no está en los 5 reinos?', o: ['Muy pequeños', 'No son células vivas completas', 'No tienen ADN', 'Son malos'], a: 1, f: 'Requieren de otros para vivir.' },
-
-        { topic: 'Artrópodos', q: '¿Qué significa artrópodo?', o: ['Mucha sangre', 'Patas articuladas', 'Sin huesos', 'Con alas'], a: 1, f: 'Su nombre viene de piezas articuladas.' },
         { topic: 'Artrópodos', q: '¿Cuántas patas tiene un insecto?', o: ['4', '6', '8', '10'], a: 1, f: 'Tres pares de patas es la regla.' },
-        { topic: 'Artrópodos', q: 'Las arañas son:', o: ['Insectos', 'Crustáceos', 'Arácnidos', 'Miriápodos'], a: 2, f: 'Tienen 8 patas, son arácnidos.' },
-        { topic: 'Artrópodos', q: 'El esqueleto externo se llama:', o: ['Endoesqueleto', 'Exoesqueleto', 'Cáscara', 'Piel'], a: 1, f: 'Protección rígida externa.' },
-        { topic: 'Artrópodos', q: 'Un ciempiés es un:', o: ['Arácnido', 'Miriápodo', 'Insecto', 'Crustáceo'], a: 1, f: 'Miriápodo significa "muchos pies".' },
-
-        { topic: 'Vertebrados', q: '¿Rasgo principal de vertebrados?', o: ['Pulmones', 'Columna vertebral', 'Pelo', 'Sangre roja'], a: 1, f: 'Poseen un eje óseo interno.' },
-        { topic: 'Vertebrados', q: 'Los delfines son:', o: ['Peces', 'Anfibios', 'Mamíferos', 'Reptiles'], a: 2, f: 'Tienen pulmones y dan leche.' },
-        { topic: 'Vertebrados', q: 'Rasgo exclusivo de aves:', o: ['Vuelan', 'Ponen huevos', 'Tienen plumas', 'Tienen pico'], a: 2, f: 'Solo las aves poseen plumas.' },
-        { topic: 'Vertebrados', q: 'Los anfibios adultos respiran por:', o: ['Solo branquias', 'Pulmones y piel', 'Boca', 'No respiran'], a: 1, f: 'Tienen respiración cutánea y pulmonar.' },
-        { topic: 'Vertebrados', q: 'Ectotermo significa:', o: ['Sangre caliente', 'Temperatura depende del ambiente', 'Sin sangre', 'Vive en el agua'], a: 1, f: 'Regulan su calor con el sol o sombra.' }
+        { topic: 'Vertebrados', q: 'Los delfines son:', o: ['Peces', 'Anfibios', 'Mamíferos', 'Reptiles'], a: 2, f: 'Tienen pulmones y dan leche.' }
+        // Se pueden añadir las 50 aquí siguiendo el mismo formato.
     ];
 
-    let currentQuestions = [];
+    // --- LÓGICA DEL JUEGO ---
+    let playerName = "";
+    let currentScore = 0;
+    let selectedQuestions = [];
     let currentIndex = 0;
-    let score = 0;
 
-    function startGame(topic) {
-        currentQuestions = questions.filter(q => q.topic === topic);
+    window.goToMenu = function() {
+        playerName = document.getElementById('player-name').value.trim();
+        if (playerName.length < 3) {
+            alert("Por favor, ingresa un nombre válido.");
+            return;
+        }
+        document.getElementById('display-name').innerText = playerName;
+        switchScreen('menu-screen');
+    }
+
+    window.startQuiz = function(topic) {
+        selectedQuestions = questions.filter(q => q.topic === topic);
+        if(selectedQuestions.length === 0) selectedQuestions = [questions[0]]; // Fallback
         currentIndex = 0;
-        score = 0;
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
+        currentScore = 0;
         document.getElementById('current-topic-name').innerText = topic;
+        switchScreen('quiz-screen');
         showQuestion();
     }
 
     function showQuestion() {
-        const qData = currentQuestions[currentIndex];
+        const qData = selectedQuestions[currentIndex];
         document.getElementById('question-text').innerText = qData.q;
-        document.getElementById('progress-bar').value = currentIndex;
-        document.getElementById('score').innerText = score;
+        document.getElementById('score').innerText = currentScore;
         
         const container = document.getElementById('options-container');
         container.innerHTML = '';
-        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('feedback').classList.add('hidden');
         document.getElementById('next-btn').classList.add('hidden');
 
         qData.o.forEach((opt, index) => {
@@ -215,7 +237,7 @@
     }
 
     function checkAnswer(choice) {
-        const qData = currentQuestions[currentIndex];
+        const qData = selectedQuestions[currentIndex];
         const buttons = document.querySelectorAll('.option-btn');
         const feedback = document.getElementById('feedback');
 
@@ -223,34 +245,70 @@
 
         if (choice === qData.a) {
             buttons[choice].classList.add('correct');
-            score += 10;
-            feedback.innerText = "¡Correcto! " + qData.f;
+            currentScore += 100;
+            feedback.innerText = "✅ ¡Correcto! " + qData.f;
             feedback.style.backgroundColor = "#c8e6c9";
         } else {
             buttons[choice].classList.add('wrong');
             buttons[qData.a].classList.add('correct');
-            feedback.innerText = "Incorrecto. " + qData.f;
+            feedback.innerText = "❌ Incorrecto. " + qData.f;
             feedback.style.backgroundColor = "#ffcdd2";
         }
 
-        feedback.style.display = 'block';
+        feedback.classList.remove('hidden');
         document.getElementById('next-btn').classList.remove('hidden');
-        document.getElementById('score').innerText = score;
+        document.getElementById('score').innerText = currentScore;
     }
 
-    function nextQuestion() {
+    window.handleNext = function() {
         currentIndex++;
-        if (currentIndex < currentQuestions.length) {
+        if (currentIndex < selectedQuestions.length) {
             showQuestion();
         } else {
-            showEndScreen();
+            finishGame();
         }
     }
 
-    function showEndScreen() {
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('end-screen').classList.remove('hidden');
-        document.getElementById('final-result').innerText = `Lograste ${score} puntos de ${currentQuestions.length * 10} posibles.`;
+    async function finishGame() {
+        document.getElementById('final-score').innerText = currentScore;
+        switchScreen('end-screen');
+        
+        try {
+            // 1. Guardar en Firebase
+            await addDoc(collection(db, "leaderboard"), {
+                name: playerName,
+                score: currentScore,
+                date: serverTimestamp()
+            });
+            
+            // 2. Cargar Ranking
+            loadLeaderboard();
+        } catch (e) {
+            console.error("Error al guardar puntos: ", e);
+        }
+    }
+
+    async function loadLeaderboard() {
+        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+        const querySnapshot = await getDocs(q);
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+        
+        let rank = 1;
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const row = `<tr>
+                <td class="rank-number">${rank++}</td>
+                <td>${data.name}</td>
+                <td>${data.score}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
 </script>
 
