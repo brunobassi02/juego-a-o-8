@@ -170,15 +170,14 @@
     import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // --- COPIA AQUÍ TU CONFIGURACIÓN DE FIREBASE ---
-    const firebaseConfig = {
-        apiKey: "TU_API_KEY",
-        authDomain: "TU_DOMINIO.firebaseapp.com",
-        projectId: "TU_PROJECT_ID",
-        storageBucket: "TU_STORAGE_BUCKET",
-        messagingSenderId: "TU_SENDER_ID",
-        appId: "TU_APP_ID"
-    };
-
+ const firebaseConfig = {
+  apiKey: "AIzaSyDyo4-VMaKFXy7fFAdscwqkdCCxAV8L5wU",
+  authDomain: "biochallenge-b094e.firebaseapp.com",
+  projectId: "biochallenge-b094e",
+  storageBucket: "biochallenge-b094e.firebasestorage.app",
+  messagingSenderId: "725761705810",
+  appId: "1:725761705810:web:c0206f9c80274abb62dc8b"
+};
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
